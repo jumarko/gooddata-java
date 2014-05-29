@@ -21,17 +21,22 @@ public class DataStoreService {
 
     private final Sardine sardine;
     private final GdcService gdcService;
+    private final URI gdcUri;
     private UriPrefixer prefixer;
 
-    public DataStoreService(HttpClientBuilder httClientBuilder, GdcService gdcService, String user, String pass) {
+
+
+    public DataStoreService(HttpClientBuilder httClientBuilder, GdcService gdcService, String gdcHost, String user, String pass) {
         this.gdcService = notNull(gdcService, "gdcService");
+        this.gdcUri = URI.create(notEmpty(gdcHost, "gdcHost"));
         sardine = new SardineImpl(httClientBuilder, user, pass);
     }
 
     private UriPrefixer getPrefixer() {
         if (prefixer == null) {
-            final String webDAVUri = gdcService.getGdc().getUserStagingLink();
-            prefixer = new UriPrefixer(webDAVUri);
+            final String uriString = gdcService.getGdc().getUserStagingLink();
+            final URI uri = URI.create(uriString);
+            prefixer = new UriPrefixer(uri.isAbsolute() ? uri : gdcUri.resolve(uriString));
             sardine.enablePreemptiveAuthentication(prefixer.getDefaultUri().getHost());
         }
         return prefixer;

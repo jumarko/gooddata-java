@@ -70,7 +70,7 @@ public class GoodData {
         metadataService = new MetadataService(restTemplate);
         modelService = new ModelService(restTemplate);
         gdcService = new GdcService(restTemplate);
-        dataStoreService = new DataStoreService(httpClientBuilder, gdcService, login, password);
+        dataStoreService = new DataStoreService(httpClientBuilder, gdcService, hostname, login, password);
         datasetService = new DatasetService(restTemplate, dataStoreService);
         reportService = new ReportService(restTemplate);
     }
