@@ -51,15 +51,15 @@ Query, create and update project metadata - attributes, facts, metrics, reports,
 MetadataService md = gd.getMetadataService();
 
 String factUri = md.getObjUri(project, Fact.class, Restriction.title("myfact"));
+Metric m = new Metric("my sum", "SELECT SUM([" + factUri + "])", "#,##0");
+Metric metric = md.createObj(project, m);
+Attribute attr = md.getObj(project, Attribute.class, Restriction.title("myattr"));
 
-Metric metric = new Metric("my sum", "SELECT SUM([" + factUri + "])", "#,##0");
-Metric m = md.createObj(project, metric);
-
-ReportDefinition definition = GridReportDefinition.create(
+ReportDefinition definition = GridReportDefinitionContent.create(
         "my report",
         asList("metricGroup"),
-        asList(new AttributeItem("/gdc/md/PROJECT_ID/obj/ID")),
-        asList(new Item("/gdc/md/PROJECT_ID/obj/ID"))
+        Arrays.<GridElement>asList(new AttributeInGrid(attr.getDefaultDisplayForm().getUri())),
+        asList(new GridElement(metric.getUri(), ""))
 );
 md.createMd(project, definition);
 ```

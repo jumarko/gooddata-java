@@ -7,10 +7,15 @@ import com.gooddata.account.Account;
 import com.gooddata.account.AccountService;
 import com.gooddata.dataset.DatasetManifest;
 import com.gooddata.dataset.DatasetService;
+import com.gooddata.md.Attribute;
 import com.gooddata.md.Fact;
 import com.gooddata.md.MetadataService;
 import com.gooddata.md.Metric;
 import com.gooddata.md.Restriction;
+import com.gooddata.md.report.AttributeInGrid;
+import com.gooddata.md.report.GridElement;
+import com.gooddata.md.report.GridReportDefinitionContent;
+import com.gooddata.md.report.Report;
 import com.gooddata.md.report.ReportDefinition;
 import com.gooddata.model.ModelDiff;
 import com.gooddata.model.ModelService;
@@ -20,7 +25,10 @@ import com.gooddata.report.ReportExportFormat;
 import com.gooddata.report.ReportService;
 
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Collection;
+
+import static java.util.Arrays.asList;
 
 public class Example {
 
@@ -43,19 +51,27 @@ public class Example {
                 new InputStreamReader(Example.class.getResourceAsStream("/person.json"))).get();
         modelService.updateProjectModel(project, projectModelDiff);
 
-        final MetadataService md = gd.getMetadataService();
-
-        final String factUri = md.getObjUri(project, Fact.class, Restriction.title("myfact"));
-
-        final Metric m = md.createObj(project, new Metric("my sum", "SELECT SUM([" + factUri + "])", "#,##0"));
-
         final DatasetService datasetService = gd.getDatasetService();
         final DatasetManifest manifest = datasetService.getDatasetManifest(project, "dataset.person");
         datasetService.loadDataset(project, manifest, Example.class.getResourceAsStream("/person.csv")).get();
 
-        final ReportDefinition reportDef = md.getObjByUri("/gdc/md/GoodSalesDemoKokot1/obj/1962", ReportDefinition.class);
+        final MetadataService md = gd.getMetadataService();
+
+        final String factUri = md.getObjUri(project, Fact.class, Restriction.title("Person Shoe Size"));
+        final Metric metric = md.createObj(project, new Metric("Shoe size sum", "SELECT SUM([" + factUri + "])", "#,##0"));
+        final Attribute attr = md.getObj(project, Attribute.class, Restriction.title("Department"));
+
+        final ReportDefinition reportDefinition = GridReportDefinitionContent.create(
+                "my report definition",
+                asList("metricGroup"),
+                Arrays.<GridElement>asList(new AttributeInGrid(attr.getDefaultDisplayForm().getUri())),
+                asList(new GridElement(metric.getUri(), ""))
+        );
+        final ReportDefinition definition = md.createObj(project, reportDefinition);
+        md.createObj(project, new Report("my report", definition));
+
         final ReportService reportService = gd.getReportService();
-        final String imgUri = reportService.exportReport(reportDef, ReportExportFormat.PNG);
+        final String imgUri = reportService.exportReport(definition, ReportExportFormat.PNG);
         System.out.println(imgUri);
 
         gd.logout();
