@@ -19,18 +19,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collection;
@@ -54,6 +50,21 @@ public class ProcessService extends AbstractService {
     public ProcessService(RestTemplate restTemplate, AccountService accountService) {
         super(restTemplate);
         this.accountService = notNull(accountService, "accountService");
+    }
+
+    /**
+     * Create new process without data.
+     * Only some specific types of processes can be created without data.
+     *
+     * @param project project to which the process belongs
+     * @param process to create
+     * @return created process
+     */
+    public Process createProcess(Project project, Process process) {
+        notNull(process, "process");
+        notNull(project, "project");
+
+        return postProcess(process, getProcessesUri(project));
     }
 
     /**
@@ -249,6 +260,14 @@ public class ProcessService extends AbstractService {
 
     private static URI getProcessesUri(Project project) {
         return Processes.TEMPLATE.expand(project.getId());
+    }
+
+    private Process postProcess(Process process, URI postUri) {
+        try {
+            return restTemplate.postForObject(postUri, process, Process.class);
+        } catch (GoodDataException | RestClientException e) {
+            throw new GoodDataException("Unable to create dataload process.", e);
+        }
     }
 
     private Process postProcess(Process process, File processData, URI postUri) {
