@@ -10,6 +10,7 @@ import com.gooddata.GoodDataRestException;
 import com.gooddata.PollHandler;
 import com.gooddata.account.AccountService;
 import com.gooddata.gdc.UriResponse;
+import com.gooddata.project.outputstage.ProjectOutputStage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClientException;
@@ -146,6 +147,23 @@ public class ProjectService extends AbstractService {
             restTemplate.delete(project.getSelfLink());
         } catch (GoodDataRestException | RestClientException e) {
             throw new GoodDataException("Unable to delete project " + project.getId(), e);
+        }
+    }
+
+    /**
+     * Get project's warehouse output stage by project ID.
+     *
+     * @param projectId simple ID of project
+     * @return project output stage
+     * @throws com.gooddata.GoodDataException when project's output stage can't be accessed
+     */
+    public ProjectOutputStage getProjectOutputStage(final String projectId) {
+        notEmpty(projectId, "projectId cannot be empty!");
+
+        try {
+            return restTemplate.getForObject(ProjectOutputStage.TEMPLATE.expand(projectId), ProjectOutputStage.class);
+        } catch (RestClientException e) {
+            throw new GoodDataException("Unable to get project's output stage, project id=" + projectId, e);
         }
     }
 }
