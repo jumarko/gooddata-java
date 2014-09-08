@@ -3,6 +3,9 @@
  */
 package com.gooddata.project;
 
+import static com.gooddata.Validate.notEmpty;
+import static com.gooddata.Validate.notNull;
+
 import com.gooddata.AbstractService;
 import com.gooddata.FutureResult;
 import com.gooddata.GoodDataException;
@@ -11,6 +14,7 @@ import com.gooddata.PollHandler;
 import com.gooddata.account.AccountService;
 import com.gooddata.gdc.UriResponse;
 import com.gooddata.project.outputstage.ProjectOutputStage;
+import com.gooddata.project.outputstage.mapping.MappingDefinition;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClientException;
@@ -18,9 +22,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.Collection;
-
-import static com.gooddata.Validate.notEmpty;
-import static com.gooddata.Validate.notNull;
 
 /**
  * List projects, create a project, ...
@@ -164,6 +165,16 @@ public class ProjectService extends AbstractService {
             return restTemplate.getForObject(ProjectOutputStage.TEMPLATE.expand(projectId), ProjectOutputStage.class);
         } catch (RestClientException e) {
             throw new GoodDataException("Unable to get project's output stage, project id=" + projectId, e);
+        }
+    }
+
+    public void saveOutputStageMapping(final ProjectOutputStage projectOutputStage, final MappingDefinition mappingDefinition) {
+        notNull(projectOutputStage, "projectOutputStage cannot be null!");
+        notNull(mappingDefinition, "mappingDefinition cannot be null!");
+        try {
+            restTemplate.put(projectOutputStage.getLinks().getMapping(), mappingDefinition);
+        } catch (GoodDataException | RestClientException e) {
+            throw new GoodDataException("Unable to put project's output stage mapping, projectMapping=" + projectOutputStage.getLinks().getMapping(), e);
         }
     }
 }
