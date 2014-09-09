@@ -51,6 +51,19 @@ public class Project {
         meta = new ProjectMeta(title, summary);
     }
 
+    /**
+     * Creates new project with given attributes using authorization token and based on {@code driver}.
+     * @param title project title
+     * @param summary short project summary
+     * @param authorizationToken authorization token for creating the new project
+     * @param driver driver on which the project is based, default is "Pg" (PostgreSQL), other option are "vertica"
+     *               for Vertica columnar DB based projects.
+     */
+    public Project(String title, String summary, String authorizationToken, String driver) {
+        content = new ProjectContent(authorizationToken, driver);
+        meta = new ProjectMeta(title, summary);
+    }
+
     @JsonCreator
     private Project(@JsonProperty("content") ProjectContent content, @JsonProperty("meta") ProjectMeta meta,
                     @JsonProperty("links") Links links) {
@@ -262,10 +275,15 @@ public class Project {
         }
 
         public ProjectContent(final String authorizationToken) {
-            this.authorizationToken = authorizationToken;
-            guidedNavigation = "1";
-            driver = "Pg";
+            this(authorizationToken, "Pg");
         }
+
+        public ProjectContent(final String authorizationToken, String driver) {
+            this.authorizationToken = authorizationToken;
+            this.driver = driver;
+            guidedNavigation = "1";
+        }
+
 
         public String getState() {
             return state;
