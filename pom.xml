@@ -111,6 +111,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.gooddata.msf</groupId>
+            <artifactId>msf-dto</artifactId>
+            <version>1.0.80</version>
+        </dependency>
+        <dependency>
             <groupId>com.gooddata</groupId>
             <artifactId>gooddata-http-client</artifactId>
             <version>0.8.2</version>
