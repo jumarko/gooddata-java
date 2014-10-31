@@ -8,11 +8,6 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.springframework.web.util.UriTemplate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 /**
  * Logical model of ADS output stage
  */
@@ -22,24 +17,18 @@ import java.util.Objects;
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
 public class ProjectOutputStage {
 
-    public static final String URI = "/gdc/dataload/internal/projects/{projectId}/outputStage";
-    public static final UriTemplate TEMPLATE = new UriTemplate(URI);
+    private final String schema;
 
-    private final List<Table> tables;
     private final Links links;
 
-    public ProjectOutputStage(List<Table> tables) {
-        this(tables, null);
-    }
-
     @JsonCreator
-    public ProjectOutputStage(@JsonProperty("tables") List<Table> tables, @JsonProperty("links") Links links) {
-        this.tables = tables == null ? Collections.<Table>emptyList() : new ArrayList<Table>(tables);
+    public ProjectOutputStage(@JsonProperty("schema") String schema, @JsonProperty("links") Links links) {
+        this.schema = schema;
         this.links = links;
     }
 
-    public List<Table> getTables() {
-        return Collections.unmodifiableList(tables);
+    public String getSchema() {
+        return schema;
     }
 
     public Links getLinks() {
@@ -47,54 +36,76 @@ public class ProjectOutputStage {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(tables);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ProjectOutputStage that = (ProjectOutputStage) o;
+
+        if (links != null ? !links.equals(that.links) : that.links != null) {
+            return false;
+        }
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final ProjectOutputStage other = (ProjectOutputStage) obj;
-        return Objects.equals(this.tables, other.tables);
+    public int hashCode() {
+        int result = schema != null ? schema.hashCode() : 0;
+        result = 31 * result + (links != null ? links.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "ProjectOutputStage{" +
-                "tables=" + tables +
-                ", links=" + links +
-                '}';
+        final StringBuilder sb = new StringBuilder("ProjectOutputStage{");
+        sb.append("schema='").append(schema).append('\'');
+        sb.append(", links=").append(links);
+        sb.append('}');
+        return sb.toString();
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
     public static class Links {
-        private final String self;
-        private final String ads;
-        private final String mapping;
 
-        @JsonCreator
-        public Links(@JsonProperty("self") String self, @JsonProperty("ads") String ads, @JsonProperty("mapping") String mapping) {
+        private final String self;
+
+        private final String outputStageModel;
+
+        private final String outputStageMapping;
+
+        private final String outputStageMetadata;
+
+        public Links(@JsonProperty("self") String self, @JsonProperty("outputStageModel") String outputStageModel,
+                @JsonProperty("outputStageMapping") String outputStageMapping, @JsonProperty("outputStageMetadata") String outputStageMetadata) {
             this.self = self;
-            this.ads = ads;
-            this.mapping = mapping;
+            this.outputStageModel = outputStageModel;
+            this.outputStageMapping = outputStageMapping;
+            this.outputStageMetadata = outputStageMetadata;
         }
 
         public String getSelf() {
             return self;
         }
 
-        public String getAds() {
-            return ads;
+        public String getOutputStageModel() {
+            return outputStageModel;
         }
 
-        public String getMapping() {
-            return mapping;
+        public String getOutputStageMapping() {
+            return outputStageMapping;
+        }
+
+        public String getOutputStageMetadata() {
+            return outputStageMetadata;
         }
 
         @Override
@@ -106,12 +117,15 @@ public class ProjectOutputStage {
                 return false;
             }
 
-            final Links links = (Links) o;
+            Links links = (Links) o;
 
-            if (ads != null ? !ads.equals(links.ads) : links.ads != null) {
+            if (outputStageMapping != null ? !outputStageMapping.equals(links.outputStageMapping) : links.outputStageMapping != null) {
                 return false;
             }
-            if (mapping != null ? !mapping.equals(links.mapping) : links.mapping != null) {
+            if (outputStageMetadata != null ? !outputStageMetadata.equals(links.outputStageMetadata) : links.outputStageMetadata != null) {
+                return false;
+            }
+            if (outputStageModel != null ? !outputStageModel.equals(links.outputStageModel) : links.outputStageModel != null) {
                 return false;
             }
             if (self != null ? !self.equals(links.self) : links.self != null) {
@@ -124,18 +138,21 @@ public class ProjectOutputStage {
         @Override
         public int hashCode() {
             int result = self != null ? self.hashCode() : 0;
-            result = 31 * result + (ads != null ? ads.hashCode() : 0);
-            result = 31 * result + (mapping != null ? mapping.hashCode() : 0);
+            result = 31 * result + (outputStageModel != null ? outputStageModel.hashCode() : 0);
+            result = 31 * result + (outputStageMapping != null ? outputStageMapping.hashCode() : 0);
+            result = 31 * result + (outputStageMetadata != null ? outputStageMetadata.hashCode() : 0);
             return result;
         }
 
         @Override
         public String toString() {
-            return "Links{" +
-                    "self='" + self + '\'' +
-                    ", ads='" + ads + '\'' +
-                    ", mapping='" + mapping + '\'' +
-                    '}';
+            final StringBuilder sb = new StringBuilder("Links{");
+            sb.append("self='").append(self).append('\'');
+            sb.append(", outputStageModel='").append(outputStageModel).append('\'');
+            sb.append(", outputStageMapping='").append(outputStageMapping).append('\'');
+            sb.append(", outputStageMetadata='").append(outputStageMetadata).append('\'');
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

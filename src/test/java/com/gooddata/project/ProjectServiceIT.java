@@ -9,12 +9,12 @@ import static org.junit.Assert.assertThat;
 import com.gooddata.AbstractGoodDataIT;
 import com.gooddata.GoodDataException;
 import com.gooddata.GoodDataRestException;
+import com.gooddata.dlui.ads.OutputStage;
 import com.gooddata.gdc.UriResponse;
 import com.gooddata.project.outputstage.DataType;
 import com.gooddata.project.outputstage.DataTypeName;
 import com.gooddata.project.outputstage.Table;
 import com.gooddata.project.outputstage.TableColumn;
-import com.gooddata.project.outputstage.ProjectOutputStage;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +24,8 @@ public class ProjectServiceIT extends AbstractGoodDataIT {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String PROJECT_ID = "PROJECT_ID";
     private static final String PROJECT_URI = "/gdc/projects/" + PROJECT_ID;
+    private static final String WAREHOUSE_ID = "s44c434575a98a2a81910e522b771318";
+    private static final String OS_SCHEMA_ID = "default";
 
     private Project loading;
     private Project enabled;
@@ -132,26 +134,13 @@ public class ProjectServiceIT extends AbstractGoodDataIT {
     public void shouldGetProjectOutputStage() throws Exception {
         onRequest()
                 .havingMethodEqualTo("GET")
-                .havingPathEqualTo(ProjectOutputStage.TEMPLATE.expand(PROJECT_ID).toString())
+                .havingPathEqualTo(ProjectService.OS_TEMPLATE.expand(PROJECT_ID).toString())
                 .respond()
                 .withBody(readResource("/project/output-stage.json"))
                 .withStatus(200);
 
-        final ProjectOutputStage projectOutputStage = gd.getProjectService().getProjectOutputStage(PROJECT_ID);
+        final OutputStage projectOutputStage = gd.getProjectService().getProjectOutputStage(PROJECT_ID);
         assertThat(projectOutputStage, is(notNullValue()));
-        assertThat(projectOutputStage.getTables(), containsInAnyOrder(
-                new Table("country",asList(
-                        new TableColumn("country_id", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("country_name", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("country_abre", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("region", new DataType(DataTypeName.VARCHAR)))),
-                new Table("customer",asList(
-                        new TableColumn("id", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("name", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("ticker", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("web", new DataType(DataTypeName.VARCHAR)),
-                        new TableColumn("age", new DataType(DataTypeName.INTEGER)),
-                        new TableColumn("created_date", new DataType(DataTypeName.DATE))))
-                ));
+        assertThat(projectOutputStage.getSchema(), is("/gdc/datawarehouse/instances/s44c434575a98a2a81910e522b771318/schemas/default"));
     }
 }

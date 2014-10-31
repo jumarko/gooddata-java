@@ -12,13 +12,15 @@ import com.gooddata.GoodDataException;
 import com.gooddata.GoodDataRestException;
 import com.gooddata.PollHandler;
 import com.gooddata.account.AccountService;
+import com.gooddata.dlui.ads.OutputStage;
 import com.gooddata.dlui.mapping.MappingDefinition;
 import com.gooddata.gdc.UriResponse;
-import com.gooddata.project.outputstage.ProjectOutputStage;
+import com.gooddata.warehouse.Warehouse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -37,6 +39,10 @@ import java.util.Collection;
 public class ProjectService extends AbstractService {
 
     private final AccountService accountService;
+
+    public static final String OS_URI = "/gdc/dataload/internal/projects/{projectId}/outputStage";
+    public static final UriTemplate OS_TEMPLATE = new UriTemplate(OS_URI);
+    public static final UriTemplate OS_SCHEMA_TEMPLATE = new UriTemplate(Warehouse.URI + "/schemas/{schemaName}");
 
     /**
      * Constructs service for GoodData project management (list projects, create a project, ...).
@@ -158,23 +164,54 @@ public class ProjectService extends AbstractService {
      * @return project output stage
      * @throws com.gooddata.GoodDataException when project's output stage can't be accessed
      */
-    public ProjectOutputStage getProjectOutputStage(final String projectId) {
+    public OutputStage getProjectOutputStage(final String projectId) {
         notEmpty(projectId, "projectId cannot be empty!");
 
         try {
-            return restTemplate.getForObject(ProjectOutputStage.TEMPLATE.expand(projectId), ProjectOutputStage.class);
+            return restTemplate.getForObject(OS_TEMPLATE.expand(projectId), OutputStage.class);
         } catch (RestClientException e) {
             throw new GoodDataException("Unable to get project's output stage, project id=" + projectId, e);
         }
     }
 
-    public void saveOutputStageMapping(final ProjectOutputStage projectOutputStage, final MappingDefinition mappingDefinition) {
-        notNull(projectOutputStage, "projectOutputStage cannot be null!");
-        notNull(mappingDefinition, "mappingDefinition cannot be null!");
+    /**
+     * Links output stage schema with a given project
+     *
+     * @param projectId project identifier
+     * @param adsId identifier of data warehouse where the output stage schema is located
+     * @param schemaName project output stage schema name
+     */
+    public void linkProjectOutputStage(final String projectId, final String adsId, final String schemaName) {
+        notEmpty(projectId, "projectId cannot be empty.");
+        notEmpty(adsId, "adsId cannot be empty.");
+        notEmpty(schemaName, "schemaName cannot be empty.");
+
+        final String schemaLink = OS_SCHEMA_TEMPLATE.expand(adsId, schemaName).toString();
+        final OutputStage outputStage =  new OutputStage(schemaLink, null);
+
         try {
-            restTemplate.put(projectOutputStage.getLinks().getMapping(), mappingDefinition);
+            restTemplate.put(OS_TEMPLATE.expand(projectId), outputStage);
         } catch (GoodDataException | RestClientException e) {
-            throw new GoodDataException("Unable to put project's output stage mapping, projectMapping=" + projectOutputStage.getLinks().getMapping(), e);
+            throw new GoodDataException("Unable to link outputStage=" + outputStage.getSchema() + " for project=" + projectId, e);
         }
     }
+
+    /**
+     * Saves mapping for a given project output stage
+     *
+     * @param projectOutputStage project output stage
+     * @param mappingDefinition table mappings for the project output stage
+     */
+    public void saveOutputStageMapping(final OutputStage projectOutputStage, final MappingDefinition mappingDefinition) {
+        notNull(projectOutputStage, "projectOutputStage cannot be null!");
+        notNull(mappingDefinition, "mappingDefinition cannot be null!");
+
+        try {
+            restTemplate.put(projectOutputStage.getLinks().getOutputStageMapping(), mappingDefinition);
+        } catch (GoodDataException | RestClientException e) {
+            throw new GoodDataException("Unable to put project's output stage mapping, projectMapping=" +
+                    projectOutputStage.getLinks().getOutputStageMapping(), e);
+        }
+    }
+
 }

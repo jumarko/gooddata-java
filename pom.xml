@@ -4,9 +4,9 @@
 
     <groupId>cz.geek</groupId>
     <artifactId>gooddata-java</artifactId>
-    <version>0.8.1-DL</version>
+    <version>0.8.4-DL</version>
     <name>${project.artifactId}</name>
-    <description>GoodData Java SDK</description>
+    <description>GoodData Java SDK for DL Tool</description>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -113,7 +113,7 @@
         <dependency>
             <groupId>com.gooddata.msf</groupId>
             <artifactId>msf-dto</artifactId>
-            <version>1.0.80</version>
+            <version>1.0.83</version>
         </dependency>
         <dependency>
             <groupId>com.gooddata</groupId>
