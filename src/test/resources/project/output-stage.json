@@ -1,76 +1,12 @@
 
 {
   "outputStage" : {
-    "tables" : [ {
-      "table" : {
-        "name" : "country",
-        "columns" : [ {
-          "column" : {
-            "name" : "country_id",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "country_name",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "country_abre",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "region",
-            "dataType" : "VARCHAR(128)"
-          }
-        } ]
-      }
-    }, {
-      "table" : {
-        "name" : "customer",
-        "columns" : [ {
-          "column" : {
-            "name" : "id",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "name",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "ticker",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "web",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "country_id",
-            "dataType" : "VARCHAR(128)"
-          }
-        }, {
-          "column" : {
-            "name" : "age",
-            "dataType" : "INTEGER"
-          }
-        }, {
-          "column" : {
-            "name" : "created_date",
-            "dataType" : "DATE"
-          }
-        } ]
-      }
-    } ],
+    "schema" : "/gdc/datawarehouse/instances/s44c434575a98a2a81910e522b771318/schemas/default",
     "links" : {
       "self" : "/gdc/dataload/internal/projects/PROJECT_ID/outputStage",
-      "ads" : "/gdc/dss/instances/s44c434575a98a2a81910e522b771318",
-      "mapping" : "/gdc/dataload/internal/projects/PROJECT_ID/outputStage/mapping"
+      "outputStageModel" : "/gdc/dataload/internal/projects/PROJECT_ID/outputStage/model",
+      "outputStageMapping" : "/gdc/dataload/internal/projects/PROJECT_ID/outputStage/mapping",
+      "outputStageMetadata" : ""
     }
   }
 }
